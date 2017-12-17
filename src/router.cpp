@@ -30,20 +30,11 @@ router::router()
 /* Main Loop */
 void router::startRouter(int CONTROL_PORT)
 {
-
-
     // Setup TCP Control Listener
     createControllerSocketListener(CONTROL_PORT);
-
     fd_set socklist;
     int maxfd;
-
-    //std::cout << "Entering Select\n";
-    time_t t;
-    time(&t);
-    //std::cout << "Current time " << t << "\n";
-
-
+    
     while(true){
         // Reset FD List
         FD_ZERO(&socklist);
@@ -126,10 +117,8 @@ void router::startRouter(int CONTROL_PORT)
                     // Get Payload if there is one
                     if(payload_len != 0){
 
-                        //std::cout << "Reading Payload\n";
                         if(recvAll(control_sock,control_payload,payload_len) <= 0){
                             closeControllerSocket();
-                            //std::cout << "**Controller Disconnected\n";
                         }
                     }
 
@@ -138,7 +127,7 @@ void router::startRouter(int CONTROL_PORT)
                         case 0:
                         {
                             // Create Payload for Response to Controller
-                            std::string AUTHOR = "I, mitchelt, have read and understood the course academic integrity policy.";
+                            std::string AUTHOR = "Mitchelt";
                             sendControlResponseMessage(control_sock,control_code,0x00,AUTHOR);
                         };
                         break;
@@ -179,26 +168,25 @@ void router::startRouter(int CONTROL_PORT)
 
                         case 5:
                         // SENDFILE 0x05
-                       // std::cout << "Control Code Received: SENDFILE \n";
+                        // TODO:
 
                         break;
 
                         case 6:
                         // SENDFILE-STATS 0x06
-                       // std::cout << "Control Code Received: SENDFILE-STATS \n";
+                        // TODO:
 
                         break;
 
                         case 7:
                         // LAST-DATA-PACKET 0x07
-                       // std::cout << "Control Code Received: LAST-DATA-PACKET \n";
+                        // TODO:
 
                         break;
 
                         case 8:
                         // PENULTIMATE-DATA-PACKET 0x08
-                       // std::cout << "Control Code Received: PENULTIMATE-DATA-PACKET \n";
-
+                        // TODO:
                         break;
                     }
 
@@ -212,9 +200,7 @@ void router::startRouter(int CONTROL_PORT)
                         active_socket = s;
                     }
                 }
-
-                // Do Something...
-               // std::cout << "Message on data plane\n";
+                // TODO:
 
             }
         }
@@ -241,7 +227,6 @@ void router::addDataPlaneRouterSocket(int sock){
         }
     }
 }
-
 /* UDP PORT for Router to Router communication */
 void router::createRouterSocket(int portnum){
     router_sock = socket(AF_INET,SOCK_DGRAM,0);
@@ -314,7 +299,6 @@ void router::createControllerSocketListener(int portnum){
 init_payload_router_entry* router::getRouterInfo(int id){
     return routers[id];
 }
-
 void router::setRouterInfo(int id,init_payload_router_entry *r){
     routers[id] = r;
 
@@ -461,7 +445,6 @@ void router::sendControlResponseMessage(int control_sock, uint8_t control_code,u
     char *header;
     char *packet;
     
-
     payload_len = payload.size();
     packet_len = CONTROL_HEADER_SIZE + payload_len;
 
@@ -487,7 +470,6 @@ void router::sendControlResponseMessage(int control_sock, uint8_t control_code,u
 }
 void router::sendRoutingTableResponse(int control_sock,uint8_t control_code,uint8_t response_code,std::vector<table_entry> ft){
     // Create Header
-
     controlutil c;
     uint16_t payload_len = ROUTING_TABLE_PAYLOAD_ENTRY_SIZE * NUMBER_OF_ROUTERS;
     char *header = c.createResponseHeader(control_sock,control_code,0x00,payload_len);
@@ -518,7 +500,7 @@ void router::sendRoutingTableResponse(int control_sock,uint8_t control_code,uint
     delete [] header;
     memcpy(packet+CONTROL_HEADER_RESPONSE_SIZE,payload,payload_len);
     delete [] payload;
-
+    
     int packet_len = payload_len + CONTROL_HEADER_RESPONSE_SIZE;
     //Send data out
     int ret = sendAll(control_sock,packet,packet_len);
@@ -682,10 +664,9 @@ void router::timerInterrupt(){
     if(routing_updates.size() == 0){
         // This should actually never happen but just in case. The SELF router should always be in the queu
         // to send the routing updates out.
-
+        std::cout << "Routing Update Queue is empty for some reason..\n";
     }else{
         if(routing_updates.front().first == ROUTER_ID){
-            //std::cout << "      Timer Interrupt Caused by SELF\n";
             // Broadcast distance vector to all neighbors
             broadcastDistanceVector();
 
@@ -710,11 +691,8 @@ void router::timerInterrupt(){
 
             // Increase missedupd by 1
             n.missedupd++;
-
-            //std::cout << "Missed Update From Router " << n.id << "\n";
             if(n.missedupd >= 3){
                 // Router failed to send DV for 3 consecutive update intervals - mark offline and cost infinity
-                //std::cout << "Missed 3 Updates in a row from router " << n.id << "\n";
                 n.online = false;
                 neighbors[n.id].online = false;
                 distance_vector[n.id] = INFINITY; 
@@ -728,14 +706,12 @@ void router::timerInterrupt(){
                 p.first = n.id;
                 p.second = n;
                 routing_updates.push_back(p);
-                //std::cout << "      RouterID Missed UPD Counter = " << n.missedupd << "\n";
             }
         }
         // Update Select TIMEOUT. Based off next neighbor entry in queue
         int DIFF = interrupt_time - routing_updates.front().second.last_time;
         TIMEOUT.tv_sec = UPDATE_INTERVAL - DIFF;
     }
-
 }
 /*
     Print Functions
