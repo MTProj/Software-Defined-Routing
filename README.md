@@ -2,6 +2,14 @@
 Demonstrates software defined routing using the distance vector protocol to update forwarding tables between routers.  
   
 **NOTE: Controller Program was not written by me. This program virtualizes a controller used for SDN routing. It sends and receives messages from the routers via a TCP socket communication.  
+  
+This program emulates a simple SDN network with N routers. It can be run locally on one machine as long as each router ports are different and the local IP is specified. Or each router can be run seperatly on different machines. The topology files below will build the graph. Each router when started will begin listening on the TCP port specified for the controller to send the INIT file. Once the INIT file is received the router will update it's distance vector and begin sending routing updates after the specified interval.  
+
+Multiple sockets and the timer is handled using select().  
+
+Routers communicate via UDP port specified in the INIT file.  
+
+Multiple timers is implemented using one timer and the receive time of each Distance Vector update. If a router is not updated with a neighbors Distance vector for 3 consecutive update periods then that router will be considered as offline and the forwarding table will be updated this will propagate through the network.
 
 # Compile  
 There is an included makefile which will compile the program  
