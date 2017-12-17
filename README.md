@@ -20,6 +20,7 @@ The controller can send multiple different commands use ./controller -h
 The first command that should be sent once all routers are up is the init command, this will initialize all routers. From here, the distance vector protocol will begin and after a few rounds all routers will have the updated shortest path to all other routers in the graph.  
 # Topology files  
 The controller must take in a topology file argument for the INIT command. The topology file contains the graph of the network. It should contain the following.  
+
 Line 1 - Number of routers (N)  
 Line 2 - N: Each line will represent a router with the following information <ID> <IP> <Controller Port> <Router Port> <Data Port>
 Line 3 - ?? : Each line will contain router link costs. Example 1 2 4. This means  link 1 to 2 has cost 4.  
